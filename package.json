@@ -12,11 +12,11 @@
         "dune",
         "build",
         "-p",
-        "libvterm"
+        "vterm"
       ]
     ],
     "install": [
-      "esy-installer libvterm.install"
+      "esy-installer vterm.install"
     ]
   },
   "dependencies": {
@@ -27,7 +27,7 @@
     "esy-libvterm": "github:revery-ui/esy-libvterm#087d514"
   },
   "resolutions": {
-    "esy-libvterm": "link:../esy-libvterm"
+    "esy-libvterm": "revery-ui/esy-libvterm#dc4c8fe"
   },
   "devDependencies": {
     "ocaml": ">=4.6.0 <=4.9.0"
