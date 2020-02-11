@@ -1,0 +1,1 @@
+VTermTest.TestFramework.cli();
