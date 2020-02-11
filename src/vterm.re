@@ -14,6 +14,7 @@ module Internal = {
   external get_utf8: (terminal) => bool = "reason_libvterm_vterm_get_utf8";
   external get_size: (terminal) => size = "reason_libvterm_vterm_get_size";
   external set_size: (terminal, size) => unit = "reason_libvterm_vterm_set_size";
+  external input_write: (terminal, string) => int = "reason_libvterm_vterm_input_write";
 };
 
 let make = (~rows, ~cols) => {
@@ -41,4 +42,8 @@ let setSize = (~size, {terminal}) => {
 
 let getSize = ({terminal}) => {
   Internal.get_size(terminal);
+};
+
+let write = (~input, {terminal}) => {
+  Internal.input_write(terminal, input); 
 };

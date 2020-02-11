@@ -29,4 +29,13 @@ describe("VTerm", ({describe, test}) => {
     expect.equal(rows, 10);
     expect.equal(cols, 15);
   });
+  describe("input", ({test, _}) => {
+    test("returns value", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let res = write(~input="abc", vterm);
+      expect.equal(res, 3);
+    });
+  
+  });
 });

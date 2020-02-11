@@ -62,3 +62,12 @@ CAMLprim value reason_libvterm_vterm_set_size(value vTerm, value vSize) {
 	vterm_set_size(pTerm, rows, cols);
 	CAMLreturn(Val_unit);
 }
+
+CAMLprim value reason_libvterm_vterm_input_write(value vTerm, value vStr) {
+	CAMLparam2(vTerm, vStr);
+	VTerm *pTerm = (VTerm*)vTerm;
+	int len = caml_string_length(vStr);
+	char *bytes = String_val(vStr);
+	int ret = vterm_input_write(pTerm, bytes, len);
+	CAMLreturn(Val_int(ret));
+}
