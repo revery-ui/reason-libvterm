@@ -11,7 +11,7 @@
 #include <vterm.h>
 
 CAMLprim value reason_libvterm_vterm_new(value vRows, value vCol) {
-	CAMLparam0();
+	CAMLparam2(vRows, vCol);
 	int rows = Int_val(vRows);
 	int cols = Int_val(vCol);
 	VTerm* pTerm = vterm_new(rows, cols);
@@ -19,8 +19,23 @@ CAMLprim value reason_libvterm_vterm_new(value vRows, value vCol) {
 }
 
 CAMLprim value reason_libvterm_vterm_free(value vTerm) {
-	CAMLparam0();
+	CAMLparam1(vTerm);
 	VTerm *pTerm = (VTerm*)vTerm;
 	vterm_free(pTerm);
 	CAMLreturn(Val_unit);
+}
+
+CAMLprim value reason_libvterm_vterm_set_utf8(value vTerm, value vUtf8) {
+	CAMLparam2(vTerm, vUtf8);
+	VTerm *pTerm = (VTerm*)vTerm;
+	int isUtf8 = Bool_val(vUtf8);
+	vterm_set_utf8(pTerm, isUtf8);
+	CAMLreturn(Val_unit);
+}
+
+CAMLprim value reason_libvterm_vterm_get_utf8(value vTerm) {
+	CAMLparam1(vTerm);
+	VTerm *pTerm = (VTerm*)vTerm;
+	int isUtf8 = vterm_get_utf8(pTerm);
+	CAMLreturn(Val_int(isUtf8));
 }
