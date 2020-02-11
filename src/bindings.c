@@ -39,3 +39,26 @@ CAMLprim value reason_libvterm_vterm_get_utf8(value vTerm) {
 	int isUtf8 = vterm_get_utf8(pTerm);
 	CAMLreturn(Val_int(isUtf8));
 }
+
+CAMLprim value reason_libvterm_vterm_get_size(value vTerm) {
+	CAMLparam1(vTerm);
+	CAMLlocal1(ret);
+	VTerm *pTerm = (VTerm*)vTerm;
+	int rows, cols;
+	vterm_get_size(pTerm, &rows, &cols);
+
+	ret = caml_alloc(2, 0);
+	Store_field(ret, 0, Val_int(rows));
+	Store_field(ret, 1, Val_int(cols));
+
+	CAMLreturn(ret);
+}
+
+CAMLprim value reason_libvterm_vterm_set_size(value vTerm, value vSize) {
+	CAMLparam2(vTerm, vSize);
+	VTerm *pTerm = (VTerm*)vTerm;
+	int rows = Int_val(Field(vSize, 0));
+	int cols = Int_val(Field(vSize, 1));
+	vterm_set_size(pTerm, rows, cols);
+	CAMLreturn(Val_unit);
+}
