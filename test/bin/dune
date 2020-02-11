@@ -3,5 +3,5 @@
     (public_name VTermUnitTestRunner)
     (package vterm-test)
     (libraries
-        VTermTest
+        vterm-test.lib
             ))
