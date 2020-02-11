@@ -1,5 +1,16 @@
-external test: unit => unit = "reason_libvterm_test";
+module VTerm = {
+	type t;
 
-let () = print_endline("Hello, world!");
+	module Internal = {
+		external newVterm: (int, int) => t = "reason_libvterm_vterm_new";
+		external freeVterm: (t) => unit = "reason_libvterm_vterm_free";
+	}
 
-let () = test();
+	let make = (~rows, ~cols) => {
+		let term = Internal.newVterm(rows, cols);
+		let () = Gc.finalise((termToDispose) => {
+			Internal.freeVterm(termToDispose);
+		}, term);
+		term;
+	};
+}
