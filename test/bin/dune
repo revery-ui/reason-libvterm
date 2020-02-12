@@ -1,0 +1,7 @@
+(executable
+    (name VTermUnitTestRunner)
+    (public_name VTermUnitTestRunner)
+    (package vterm-test)
+    (libraries
+        vterm-test.lib
+            ))

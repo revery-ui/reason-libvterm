@@ -1,0 +1,9 @@
+(dirs bin)
+
+(library
+    (name VTermTest)
+    (public_name vterm-test.lib)
+    (flags (:standard (-w -39)))
+    (ocamlopt_flags -linkall -g)
+    (libraries rely.lib vterm)
+)

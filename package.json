@@ -1,0 +1,35 @@
+{
+  "name": "reason-libvterm",
+  "version": "1.0.1",
+  "description": "libvterm bindings for OCaml/ReasonML",
+  "license": "MIT",
+  "scripts": {
+    "format": "esy dune build @fmt --auto-promote"
+  },
+  "esy": {
+    "build": [
+      [
+        "dune",
+        "build",
+        "-p",
+        "vterm"
+      ]
+    ],
+    "install": [
+      "esy-installer vterm.install"
+    ]
+  },
+  "dependencies": {
+    "@opam/dune": "*",
+    "@opam/dune-configurator": "*",
+    "@esy-ocaml/reason": "^3.3.7",
+    "refmterr": "^3.1.0",
+    "esy-libvterm": "github:revery-ui/esy-libvterm#087d514"
+  },
+  "resolutions": {
+    "esy-libvterm": "revery-ui/esy-libvterm#5bac869"
+  },
+  "devDependencies": {
+    "ocaml": ">=4.6.0 <=4.9.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "source": "./package.json",
+  "scripts": {
+    "run": "esy '@test' x VTermUnitTestRunner"
+  },
+  "override": {
+      "build": ["dune build -p vterm,vterm-test -j4"],
+      "dependencies": {
+          "@reason-native/rely": "2.2.0"
+      },
+      "install": [
+          "esy-installer vterm.install",
+          "esy-installer vterm-test.install"
+      ]
+  }
+}
