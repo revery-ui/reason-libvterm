@@ -135,9 +135,17 @@ module Internal = {
     };
   };
 
+  let onScreenDamage = (id: int, rect: Rect.t) => {
+    switch (Hashtbl.find_opt(idToOutputCallback, id)) {
+    | Some({onScreenDamage, _}) => onScreenDamage^(rect)
+    | None => ()
+    };
+  };
+
   Callback.register("reason_libvterm_onOutput", onOutput);
   Callback.register("reason_libvterm_onScreenBell", onScreenBell);
   Callback.register("reason_libvterm_onScreenResize", onScreenResize);
+  Callback.register("reason_libvterm_onScreenDamage", onScreenDamage);
 };
 
 module Screen = {
@@ -147,6 +155,10 @@ module Screen = {
 
   let setResizeCallback = (~onResize, terminal) => {
     terminal.callbacks.onScreenResize := onResize;
+  };
+
+  let setDamageCallback = (~onDamage, terminal) => {
+    terminal.callbacks.onScreenDamage := onDamage;
   };
 };
 

@@ -62,6 +62,20 @@ describe("VTerm", ({describe, test}) => {
       expect.equal(getRows^, 5);
       expect.equal(getCols^, 6);
     });
+
+    test("damage", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let damageCount = ref(0);
+      Screen.setDamageCallback(~onDamage=_ => incr(damageCount), vterm);
+
+      let _: int = write(~input="a", vterm);
+      expect.equal(damageCount^, 1);
+
+      Gc.full_major();
+      let _: int = write(~input="b", vterm);
+      expect.equal(damageCount^, 2);
+    });
   });
   describe("output", ({test, _}) => {
     test("keyboard_unichar_test", ({expect}) => {

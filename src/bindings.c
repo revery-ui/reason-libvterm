@@ -11,6 +11,7 @@
 
 #include <vterm.h>
 
+
 void reason_libvterm_onOutputF(const char *s, size_t len, void *user) {
 	CAMLparam0();
 	CAMLlocal1(ret);
@@ -57,6 +58,25 @@ int reason_libvterm_onScreenResizeF(int rows, int cols, void *user) {
 	CAMLreturn(0);
 }
 
+int reason_libvterm_onScreenDamageF(VTermRect rect, void* user) {
+	CAMLparam0();
+	CAMLlocal1(outRect);
+
+	outRect = caml_alloc(4, 0);
+	Store_field(outRect, 0, Val_int(rect.start_row));
+	Store_field(outRect, 1, Val_int(rect.end_row));
+	Store_field(outRect, 2, Val_int(rect.start_col));
+	Store_field(outRect, 3, Val_int(rect.end_col));
+	static value *reason_libvterm_onScreenDamage = NULL;
+
+	if (reason_libvterm_onScreenDamage == NULL) {
+		reason_libvterm_onScreenDamage = (value *)caml_named_value("reason_libvterm_onScreenDamage");
+	}
+	
+	caml_callback2(*reason_libvterm_onScreenDamage, Val_int(user), outRect);
+	CAMLreturn(0);
+}
+
 int VTermMod_val(value vMod) {
 	switch (Int_val(vMod)) {
 		case 0:
@@ -88,6 +108,7 @@ CAMLprim value reason_libvterm_vterm_keyboard_unichar(value vTerm, value vChar, 
 static VTermScreenCallbacks reason_libvterm_screen_callbacks = {
 	.bell = &reason_libvterm_onScreenBellF,
 	.resize = &reason_libvterm_onScreenResizeF,
+	.damage = &reason_libvterm_onScreenDamageF,
 };
 
 CAMLprim value reason_libvterm_vterm_new(value vId, value vRows, value vCol) {
