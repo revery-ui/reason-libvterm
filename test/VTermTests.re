@@ -10,7 +10,7 @@ describe("VTerm", ({describe, test}) => {
     Gc.full_major();
 
     expect.equal(isFinalized^, true);
-  })
+  });
   test("utf8", ({expect}) => {
     let vterm = make(~rows=20, ~cols=20);
     setUtf8(~utf8=true, vterm);
@@ -24,7 +24,7 @@ describe("VTerm", ({describe, test}) => {
     expect.equal(rows, 20);
     expect.equal(cols, 30);
 
-    setSize(~size={rows:10, cols: 15}, vterm);
+    setSize(~size={rows: 10, cols: 15}, vterm);
     let {rows, cols} = getSize(vterm);
     expect.equal(rows, 10);
     expect.equal(cols, 15);
@@ -36,6 +36,24 @@ describe("VTerm", ({describe, test}) => {
       let res = write(~input="abc", vterm);
       expect.equal(res, 3);
     });
-  
+
+    test("beeps", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let gotBell = ref(false);
+      Screen.setBellCallback(~onBell=_ => gotBell := true, vterm);
+      let _: int = write(~input=String.make(1, Char.chr(7)), vterm);
+      expect.equal(true, gotBell^);
+    });
+  });
+  describe("output", ({test, _}) => {
+    test("keyboard_unichar_test", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let gotOutput = ref(false);
+      setOutputCallback(~output=_ => gotOutput := true, vterm);
+      let () = Keyboard.unichar(vterm, Int32.of_int(65), None);
+      expect.equal(true, gotOutput^);
+    })
   });
 });
