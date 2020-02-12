@@ -45,6 +45,23 @@ describe("VTerm", ({describe, test}) => {
       let _: int = write(~input=String.make(1, Char.chr(7)), vterm);
       expect.equal(true, gotBell^);
     });
+    test("resize", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let getRows = ref(0);
+      let getCols = ref(0);
+      Screen.setResizeCallback(
+        ~onResize=
+          (rows, cols) => {
+            getRows := rows;
+            getCols := cols;
+          },
+        vterm,
+      );
+      setSize(~size={rows: 5, cols: 6}, vterm);
+      expect.equal(getRows^, 5);
+      expect.equal(getCols^, 6);
+    });
   });
   describe("output", ({test, _}) => {
     test("keyboard_unichar_test", ({expect}) => {

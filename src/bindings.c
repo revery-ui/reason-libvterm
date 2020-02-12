@@ -47,7 +47,13 @@ int reason_libvterm_onScreenBellF(void *user) {
 int reason_libvterm_onScreenResizeF(int rows, int cols, void *user) {
 	CAMLparam0();
 
-	// TODO
+	static value *reason_libvterm_onScreenResize = NULL;
+
+	if (reason_libvterm_onScreenResize == NULL) {
+		reason_libvterm_onScreenResize = (value *)caml_named_value("reason_libvterm_onScreenResize");
+	}
+	
+	caml_callback3(*reason_libvterm_onScreenResize, Val_int(user), Val_int(rows), Val_int(cols));
 	CAMLreturn(0);
 }
 

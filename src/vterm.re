@@ -128,13 +128,25 @@ module Internal = {
     };
   };
 
+  let onScreenResize = (id: int, rows: int, cols: int) => {
+    switch (Hashtbl.find_opt(idToOutputCallback, id)) {
+    | Some({onScreenResize, _}) => onScreenResize^(rows, cols)
+    | None => ()
+    };
+  };
+
   Callback.register("reason_libvterm_onOutput", onOutput);
   Callback.register("reason_libvterm_onScreenBell", onScreenBell);
+  Callback.register("reason_libvterm_onScreenResize", onScreenResize);
 };
 
 module Screen = {
   let setBellCallback = (~onBell, terminal) => {
     terminal.callbacks.onScreenBell := onBell;
+  };
+
+  let setResizeCallback = (~onResize, terminal) => {
+    terminal.callbacks.onScreenResize := onResize;
   };
 };
 
