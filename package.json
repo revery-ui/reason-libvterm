@@ -27,7 +27,7 @@
     "esy-libvterm": "github:revery-ui/esy-libvterm#087d514"
   },
   "resolutions": {
-    "esy-libvterm": "revery-ui/esy-libvterm#dc4c8fe"
+    "esy-libvterm": "revery-ui/esy-libvterm#5bac869"
   },
   "devDependencies": {
     "ocaml": ">=4.6.0 <=4.9.0"
