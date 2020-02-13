@@ -11,6 +11,56 @@
 
 #include <vterm.h>
 
+static value 
+reason_libvterm_Val_color(VTermScreen *pScreen, VTermColor *pColor) {
+	CAMLparam0();
+	CAMLlocal1(ret);
+
+	int tag;
+
+	vterm_screen_convert_color_to_rgb(pScreen, pColor);
+
+	if (VTERM_COLOR_IS_DEFAULT_FG(pColor)) {
+		ret = Int_val(0);
+	} else if (VTERM_COLOR_IS_DEFAULT_BG(pColor)) {
+		ret = Int_val(1);
+	}
+	if (VTERM_COLOR_IS_RGB(pColor)) {
+		ret = caml_alloc(3, 0);
+		Store_field(ret, 0, Val_int(pColor->rgb.red));
+		Store_field(ret, 1, Val_int(pColor->rgb.green));
+		Store_field(ret, 2, Val_int(pColor->rgb.blue));
+	} else {
+		ret = caml_alloc(1, 1);
+		Store_field(ret, 0, Val_int(pColor->indexed.idx));
+	}
+
+	CAMLreturn(ret);
+}
+
+static value 
+reason_libvterm_Val_screencell(VTermScreen* pScreen, VTermScreenCell *pScreenCell) {
+	CAMLparam0();
+	CAMLlocal2(ret, str);
+
+
+	str = caml_alloc_string(VTERM_MAX_CHARS_PER_CELL);
+	memcpy(String_val(str), pScreenCell->chars, VTERM_MAX_CHARS_PER_CELL);
+	ret = caml_alloc(11, 0);
+	Store_field(ret, 0, str);
+	Store_field(ret, 1, Val_int(pScreenCell->width));
+	Store_field(ret, 2, reason_libvterm_Val_color(pScreen, &pScreenCell->fg));
+	Store_field(ret, 3, reason_libvterm_Val_color(pScreen, &pScreenCell->bg));
+	Store_field(ret, 4, Val_int(pScreenCell->attrs.bold));
+	Store_field(ret, 5, Val_int(pScreenCell->attrs.underline));
+	Store_field(ret, 6, Val_int(pScreenCell->attrs.italic));
+	Store_field(ret, 7, Val_int(pScreenCell->attrs.blink));
+	Store_field(ret, 8, Val_int(pScreenCell->attrs.reverse));
+	Store_field(ret, 9, Val_int(pScreenCell->attrs.conceal));
+	Store_field(ret, 10, Val_int(pScreenCell->attrs.strike));
+
+	CAMLreturn(ret);
+}
 
 void reason_libvterm_onOutputF(const char *s, size_t len, void *user) {
 	CAMLparam0();
@@ -41,6 +91,38 @@ int reason_libvterm_onScreenBellF(void *user) {
 	}
 	
 	caml_callback(*reason_libvterm_onScreenBell, Val_int(user));
+
+	CAMLreturn(0);
+}
+
+int reason_libvterm_onScreenMoveRectF(VTermRect dest, VTermRect src, void *user) {
+	CAMLparam0();
+
+	printf("!!!!\n MOVERECT\n !!!!\n");
+
+	CAMLreturn(0);
+}
+
+int reason_libvterm_onScreenMoveCursorF(VTermPos pos, VTermPos oldPos, int visible, void *user) {
+	CAMLparam0();
+
+	printf("!!!!\n MOVECURSOR\n !!!!\n");
+
+	CAMLreturn(0);
+}
+
+int reason_libvterm_onScreenSbPushLineF(int cols, const VTermScreenCell *cells, void *user) {
+	CAMLparam0();
+
+	printf("!!!!\n SB_PUSHLINE\n !!!!\n");
+
+	CAMLreturn(0);
+}
+
+int reason_libvterm_onScreenSbPopLineF(int cols, VTermScreenCell *cells, void *user) {
+	CAMLparam0();
+
+	printf("!!!!\n SB_POPLINE\n !!!!\n");
 
 	CAMLreturn(0);
 }
@@ -94,6 +176,28 @@ int VTermMod_val(value vMod) {
 	}
 }
 
+CAMLprim value reason_libvterm_vterm_screen_get_cell(value vTerm, value vRow, value vCol) {
+	CAMLparam3(vTerm, vRow, vCol);
+	CAMLlocal1(ret);
+
+	int row = Int_val(vRow);
+	int col = Int_val(vCol);
+	VTerm *pTerm = (VTerm*)vTerm;
+	VTermScreen* pScreen = vterm_obtain_screen(pTerm);
+
+	VTermPos pos;
+	pos.row = row;
+	pos.col = col;
+
+	VTermScreenCell cell;
+	vterm_screen_get_cell(pScreen, pos, &cell);
+
+	ret = reason_libvterm_Val_screencell(pScreen, &cell);
+
+
+	CAMLreturn(ret);
+}
+
 CAMLprim value reason_libvterm_vterm_keyboard_unichar(value vTerm, value vChar, value vMod) {
 	CAMLparam3(vTerm, vChar, vMod);
 
@@ -109,6 +213,10 @@ static VTermScreenCallbacks reason_libvterm_screen_callbacks = {
 	.bell = &reason_libvterm_onScreenBellF,
 	.resize = &reason_libvterm_onScreenResizeF,
 	.damage = &reason_libvterm_onScreenDamageF,
+	.moverect = &reason_libvterm_onScreenMoveRectF,
+	.movecursor = &reason_libvterm_onScreenMoveCursorF,
+	.sb_pushline = &reason_libvterm_onScreenSbPushLineF,
+	.sb_popline = &reason_libvterm_onScreenSbPopLineF,
 };
 
 CAMLprim value reason_libvterm_vterm_new(value vId, value vRows, value vCol) {

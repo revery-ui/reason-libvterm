@@ -30,36 +30,53 @@ module Pos = {
   };
 };
 
+
 module TermProp = {
+  module CursorShape = {
+    type t =
+    | Block
+    | Underline
+    | BarLeft;
+  }
+
+  module Mouse = {
+    type t =
+    | None
+    | Click
+    | Drag
+    | Move;
+  }
+
   type t =
     | None
-    | CursorVisible
-    | CursorBlink
-    | AltScreen
-    | Title
-    | IconName
-    | Reverse
-    | CursorShape
-    | Mouse;
+    | CursorVisible(bool)
+    | CursorBlink(bool)
+    | AltScreen(bool)
+    | Title(string)
+    | IconName(string)
+    | Reverse(bool)
+    | CursorShape(CursorShape.t)
+    | Mouse(Mouse.t);
 };
 
 module Color = {
   type t =
+    | DefaultForeground
+    | DefaultBackground
     | Rgb(int, int, int)
     | Index(int);
-};
 
-module TermValue = {
-  type t =
-    | Bool(bool)
-    | Int(int)
-    | String(string)
-    | Color;
+  let show = fun
+  | DefaultForeground => "DefaultForeground"
+  | DefaultBackground => "DefaultBackground"
+  | Rgb(r, g, b) => Printf.sprintf("rgb(%d, %d, %d)", r, g, b)
+  | Index(idx) => Printf.sprintf("index(%d)", idx);
 };
 
 module ScreenCell = {
   type t = {
     chars: string,
+    width: int,
     fg: Color.t,
     bg: Color.t,
     // Attributes
@@ -75,6 +92,20 @@ module ScreenCell = {
     //dwl: int,
     //dhl: int,
   };
+
+  let empty: t = {
+    chars: "",
+    width: 0,
+    fg: Color.DefaultForeground,
+    bg: Color.DefaultBackground,
+    bold: 0,
+    underline: 0,
+    italic: 0,
+    blink: 0,
+    reverse: 0,
+    conceal: 0,
+    strike: 0,
+  }
 };
 
 type callbacks = {
@@ -82,7 +113,7 @@ type callbacks = {
   onScreenDamage: ref(Rect.t => unit),
   onScreenMoveRect: ref((Rect.t, Rect.t) => unit),
   onScreenMoveCursor: ref((Pos.t, Pos.t, bool) => unit),
-  onScreenSetTermProp: ref((TermProp.t, TermValue.t) => unit),
+  onScreenSetTermProp: ref((TermProp.t) => unit),
   onScreenBell: ref(unit => unit),
   onScreenResize: ref((int, int) => unit),
   onScreenScrollbackPushLine: ref(array(ScreenCell.t) => unit),
@@ -113,6 +144,8 @@ module Internal = {
 
   external keyboard_unichar: (terminal, Int32.t, modifier) => unit =
     "reason_libvterm_vterm_keyboard_unichar";
+
+  external screen_get_cell: (terminal, int, int) => ScreenCell.t = "reason_libvterm_vterm_screen_get_cell";
 
   let onOutput = (id: int, output: string) => {
     switch (Hashtbl.find_opt(idToOutputCallback, id)) {
@@ -160,6 +193,10 @@ module Screen = {
   let setDamageCallback = (~onDamage, terminal) => {
     terminal.callbacks.onScreenDamage := onDamage;
   };
+
+  let getCell = (~row, ~col, {terminal, _}) =>  {
+    Internal.screen_get_cell(terminal, row, col); 
+  };
 };
 
 module Keyboard = {
@@ -178,7 +215,7 @@ let make = (~rows, ~cols) => {
   let onScreenMoveCursor = ref((_, _, _) => ());
   let onScreenBell = ref(() => ());
   let onScreenResize = ref((_, _) => ());
-  let onScreenSetTermProp = ref((_, _) => ());
+  let onScreenSetTermProp = ref((_) => ());
   let onScreenScrollbackPushLine = ref(_ => ());
   let onScreenScrollbackPopLine = ref(_ => ());
   let callbacks = {
@@ -205,8 +242,8 @@ let make = (~rows, ~cols) => {
   wrappedTerminal;
 };
 
-let setOutputCallback = (~output, terminal) => {
-  terminal.callbacks.onTermOutput := output;
+let setOutputCallback = (~onOutput, terminal) => {
+  terminal.callbacks.onTermOutput := onOutput;
 };
 
 let setUtf8 = (~utf8, {terminal, _}) => {

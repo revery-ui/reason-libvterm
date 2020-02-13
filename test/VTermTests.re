@@ -29,6 +29,19 @@ describe("VTerm", ({describe, test}) => {
     expect.equal(rows, 10);
     expect.equal(cols, 15);
   });
+  describe("screen", ({test, _}) => {
+    test("gets empty cell", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+      let cell = Screen.getCell(~row=0, ~col=0, vterm);
+      expect.equal(cell.chars.[0], Char.chr(0));
+    });
+    test("gets non-empty cell", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+      let _: int = write(~input=String.make(1, 'a'), vterm);
+      let cell = Screen.getCell(~row=0, ~col=0, vterm);
+      expect.equal(cell.chars.[0], 'a');
+    });
+  });
   describe("input", ({test, _}) => {
     test("returns value", ({expect}) => {
       let vterm = make(~rows=20, ~cols=30);
@@ -82,7 +95,7 @@ describe("VTerm", ({describe, test}) => {
       let vterm = make(~rows=20, ~cols=30);
 
       let gotOutput = ref(false);
-      setOutputCallback(~output=_ => gotOutput := true, vterm);
+      setOutputCallback(~onOutput=_ => gotOutput := true, vterm);
       let () = Keyboard.unichar(vterm, Int32.of_int(65), None);
       expect.equal(true, gotOutput^);
     })
