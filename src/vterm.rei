@@ -24,7 +24,7 @@ let getSize: t => size;
 
 let write: (~input: string, t) => int;
 
-module Rect {
+module Rect: {
   type t = {
     startRow: int,
     endRow: int,
@@ -35,7 +35,7 @@ module Rect {
   let toString: t => string;
 };
 
-module Pos {
+module Pos: {
   type t = {
     row: int,
     col: int,
@@ -44,8 +44,8 @@ module Pos {
   let toString: t => string;
 };
 
-module TermProp {
-  module CursorShape {
+module TermProp: {
+  module CursorShape: {
     type t =
       | Block
       | Underline
@@ -54,7 +54,7 @@ module TermProp {
     let toString: t => string;
   };
 
-  module Mouse {
+  module Mouse: {
     type t =
       | None
       | Click
@@ -78,17 +78,17 @@ module TermProp {
   let toString: t => string;
 };
 
-module Color {
+module Color: {
   type t =
     | DefaultForeground
     | DefaultBackground
     | Rgb(int, int, int)
     | Index(int);
 
-  let toString: t => string; 
+  let toString: t => string;
 };
 
-module ScreenCell {
+module ScreenCell: {
   type t = {
     chars: string,
     width: int,
@@ -111,20 +111,17 @@ module ScreenCell {
   let empty: t;
 };
 
-module Screen {
+module Screen: {
   let setBellCallback: (~onBell: unit => unit, t) => unit;
   let setResizeCallback: (~onResize: size => unit, t) => unit;
   let setDamageCallback: (~onDamage: Rect.t => unit, t) => unit;
-  let setMoveCursorCallback: (~onMoveCursor: (Pos.t, Pos.t, bool) => unit,
-  t) => unit;
+  let setMoveCursorCallback:
+    (~onMoveCursor: (Pos.t, Pos.t, bool) => unit, t) => unit;
   let setMoveRectCallback: (~onMoveRect: (Rect.t, Rect.t) => unit, t) => unit;
-  let setTermPropCallback: (~onSetTermProp: (TermProp.t) => unit, t) => unit;
-  
+  let setTermPropCallback: (~onSetTermProp: TermProp.t => unit, t) => unit;
+
   let getCell: (~row: int, ~col: int, t) => ScreenCell.t;
   let setAltScreen: (~enabled: bool, t) => unit;
-
 };
 
-module Keyboard {
-  let unichar: (t, Int32.t, modifier) => unit;
-};
+module Keyboard: {let unichar: (t, Int32.t, modifier) => unit;};

@@ -153,7 +153,7 @@ type callbacks = {
   onScreenMoveCursor: ref((Pos.t, Pos.t, bool) => unit),
   onScreenSetTermProp: ref(TermProp.t => unit),
   onScreenBell: ref(unit => unit),
-  onScreenResize: ref((size) => unit),
+  onScreenResize: ref(size => unit),
   onScreenScrollbackPushLine: ref(array(ScreenCell.t) => unit),
   onScreenScrollbackPopLine: ref(array(ScreenCell.t) => unit),
 };
@@ -330,7 +330,7 @@ let make = (~rows, ~cols) => {
   let onScreenMoveRect = ref((_, _) => ());
   let onScreenMoveCursor = ref((_, _, _) => ());
   let onScreenBell = ref(() => ());
-  let onScreenResize = ref((_) => ());
+  let onScreenResize = ref(_ => ());
   let onScreenSetTermProp = ref(_ => ());
   let onScreenScrollbackPushLine = ref(_ => ());
   let onScreenScrollbackPopLine = ref(_ => ());
