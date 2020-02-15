@@ -82,7 +82,7 @@ void reason_libvterm_onOutputF(const char *s, size_t len, void *user) {
   CAMLreturn0;
 }
 
-void reason_libvterm_onScreenSetTermPropF(VTermProp prop, VTermValue *val,
+int reason_libvterm_onScreenSetTermPropF(VTermProp prop, VTermValue *val,
                                           void *user) {
   CAMLparam0();
   CAMLlocal2(ret, str);
@@ -135,7 +135,7 @@ void reason_libvterm_onScreenSetTermPropF(VTermProp prop, VTermValue *val,
   }
 
   caml_callback2(*reason_libvterm_onScreenSetTermProp, Val_int(user), ret);
-  CAMLreturn0;
+  CAMLreturn(0);
 }
 
 int reason_libvterm_onScreenBellF(void *user) {
@@ -231,6 +231,7 @@ int reason_libvterm_onScreenSbPushLineF(int cols, const VTermScreenCell *cells,
 int reason_libvterm_onScreenSbPopLineF(int cols, VTermScreenCell *cells,
                                        void *user) {
   CAMLparam0();
+  CAMLlocal1(ret);
 
   ret = caml_alloc(cols, 0);
 
