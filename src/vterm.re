@@ -103,7 +103,7 @@ module Color = {
     | Rgb(int, int, int)
     | Index(int);
 
-  let show =
+  let toString =
     fun
     | DefaultForeground => "DefaultForeground"
     | DefaultBackground => "DefaultBackground"
@@ -153,7 +153,7 @@ type callbacks = {
   onScreenMoveCursor: ref((Pos.t, Pos.t, bool) => unit),
   onScreenSetTermProp: ref(TermProp.t => unit),
   onScreenBell: ref(unit => unit),
-  onScreenResize: ref((int, int) => unit),
+  onScreenResize: ref((size) => unit),
   onScreenScrollbackPushLine: ref(array(ScreenCell.t) => unit),
   onScreenScrollbackPopLine: ref(array(ScreenCell.t) => unit),
 };
@@ -205,7 +205,7 @@ module Internal = {
 
   let onScreenResize = (id: int, rows: int, cols: int) => {
     switch (Hashtbl.find_opt(idToOutputCallback, id)) {
-    | Some({onScreenResize, _}) => onScreenResize^(rows, cols)
+    | Some({onScreenResize, _}) => onScreenResize^({rows, cols})
     | None => ()
     };
   };
@@ -330,7 +330,7 @@ let make = (~rows, ~cols) => {
   let onScreenMoveRect = ref((_, _) => ());
   let onScreenMoveCursor = ref((_, _, _) => ());
   let onScreenBell = ref(() => ());
-  let onScreenResize = ref((_, _) => ());
+  let onScreenResize = ref((_) => ());
   let onScreenSetTermProp = ref(_ => ());
   let onScreenScrollbackPushLine = ref(_ => ());
   let onScreenScrollbackPopLine = ref(_ => ());

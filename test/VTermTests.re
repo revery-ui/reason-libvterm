@@ -101,7 +101,7 @@ describe("VTerm", ({describe, test}) => {
       let getCols = ref(0);
       Screen.setResizeCallback(
         ~onResize=
-          (rows, cols) => {
+          ({rows, cols}) => {
             getRows := rows;
             getCols := cols;
           },
