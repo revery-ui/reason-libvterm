@@ -120,6 +120,11 @@ module Screen: {
   let setMoveRectCallback: (~onMoveRect: (Rect.t, Rect.t) => unit, t) => unit;
   let setTermPropCallback: (~onSetTermProp: TermProp.t => unit, t) => unit;
 
+  let setScrollbackPopCallback:
+    (~onPopLine: array(ScreenCell.t) => unit, t) => unit;
+  let setScrollbackPushCallback:
+    (~onPushLine: array(ScreenCell.t) => unit, t) => unit;
+
   let getCell: (~row: int, ~col: int, t) => ScreenCell.t;
   let setAltScreen: (~enabled: bool, t) => unit;
 };

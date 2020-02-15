@@ -269,6 +269,22 @@ module Internal = {
     };
   };
 
+  let onScreenSbPushLine = (id: int, cells: array(ScreenCell.t)) => {
+    switch (Hashtbl.find_opt(idToOutputCallback, id)) {
+    | Some({onScreenScrollbackPushLine, _}) =>
+      onScreenScrollbackPushLine^(cells)
+    | None => ()
+    };
+  };
+
+  let onScreenSbPopLine = (id: int, cells: array(ScreenCell.t)) => {
+    switch (Hashtbl.find_opt(idToOutputCallback, id)) {
+    | Some({onScreenScrollbackPopLine, _}) =>
+      onScreenScrollbackPopLine^(cells)
+    | None => ()
+    };
+  };
+
   Callback.register("reason_libvterm_onOutput", onOutput);
   Callback.register("reason_libvterm_onScreenBell", onScreenBell);
   Callback.register("reason_libvterm_onScreenResize", onScreenResize);
@@ -279,6 +295,8 @@ module Internal = {
     "reason_libvterm_onScreenSetTermProp",
     onScreenSetTermProp,
   );
+  Callback.register("reason_libvterm_onScreenSbPushLine", onScreenSbPushLine);
+  Callback.register("reason_libvterm_onScreenSbPopLine", onScreenSbPopLine);
 };
 
 module Screen = {
@@ -300,6 +318,14 @@ module Screen = {
 
   let setMoveRectCallback = (~onMoveRect, terminal) => {
     terminal.callbacks.onScreenMoveRect := onMoveRect;
+  };
+
+  let setScrollbackPopCallback = (~onPopLine, terminal) => {
+    terminal.callbacks.onScreenScrollbackPopLine := onPopLine;
+  };
+
+  let setScrollbackPushCallback = (~onPushLine, terminal) => {
+    terminal.callbacks.onScreenScrollbackPushLine := onPushLine;
   };
 
   let getCell = (~row, ~col, {terminal, _}) => {
