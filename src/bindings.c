@@ -71,13 +71,66 @@ void reason_libvterm_onOutputF(const char *s, size_t len, void *user) {
 	if (reason_libvterm_onOutput == NULL) {
 		reason_libvterm_onOutput = (value *)caml_named_value("reason_libvterm_onOutput");
 	}
-	
 
 	ret = caml_alloc_string(len);
 	memcpy(String_val(ret), s, len);
 	
 	caml_callback2(*reason_libvterm_onOutput, Val_int(user), ret);
 
+	CAMLreturn0;
+}
+
+void reason_libvterm_onScreenSetTermPropF(VTermProp prop, VTermValue *val, void *user) {
+	CAMLparam0();
+	CAMLlocal2(ret, str);
+
+	switch (prop) {
+	case VTERM_PROP_CURSORVISIBLE:
+		ret = caml_alloc(1, 0);
+		Store_field(ret, 0, Val_bool(val->boolean));
+		break;
+	case VTERM_PROP_CURSORBLINK:
+		ret = caml_alloc(1, 1);
+		Store_field(ret, 0, Val_bool(val->boolean));
+		break;
+	case VTERM_PROP_ALTSCREEN:
+		ret = caml_alloc(1, 2);
+		Store_field(ret, 0, Val_bool(val->boolean));
+		break;
+	case VTERM_PROP_TITLE:
+		ret = caml_alloc(1, 3);
+		str = caml_copy_string(val->string.str);
+		Store_field(ret, 0, str);
+		break;
+	case VTERM_PROP_ICONNAME:
+		ret = caml_alloc(1, 4);
+		str = caml_copy_string(val->string.str);
+		Store_field(ret, 0, str);
+		break;
+	case VTERM_PROP_REVERSE:
+		ret = caml_alloc(1, 5);
+		Store_field(ret, 0, Val_bool(val->boolean));
+		break;
+	case VTERM_PROP_CURSORSHAPE:
+		ret = caml_alloc(1, 6);
+		Store_field(ret, 0, Val_int(val->number));
+		break;
+	case VTERM_PROP_MOUSE:
+		ret = caml_alloc(1, 7);
+		Store_field(ret, 0, Val_int(val->number));
+		break;
+	default:
+		ret = Val_int(0);
+		break;
+	}
+
+	static value *reason_libvterm_onScreenSetTermProp = NULL;
+
+	if (reason_libvterm_onScreenSetTermProp == NULL) {
+		reason_libvterm_onScreenSetTermProp = (value *)caml_named_value("reason_libvterm_onScreenSetTermProp");
+	}
+	
+	caml_callback2(*reason_libvterm_onScreenSetTermProp, Val_int(user), ret);
 	CAMLreturn0;
 }
 
@@ -98,7 +151,24 @@ int reason_libvterm_onScreenBellF(void *user) {
 int reason_libvterm_onScreenMoveRectF(VTermRect dest, VTermRect src, void *user) {
 	CAMLparam0();
 
-	printf("!!!!\n MOVERECT\n !!!!\n");
+	static value *reason_libvterm_onScreenMoveRect = NULL;
+
+	if (reason_libvterm_onScreenMoveRect == NULL) {
+		reason_libvterm_onScreenMoveRect = (value *)caml_named_value("reason_libvterm_onScreenMoveRect");
+	}
+
+	  value *pArgs = (value *)malloc(sizeof(value) * 9);
+	  pArgs[0] = Val_int(user);
+	  pArgs[1] = Val_int(dest.start_row);
+	  pArgs[2] = Val_int(dest.start_col);
+	  pArgs[3] = Val_int(dest.end_row);
+	  pArgs[4] = Val_int(dest.end_col);
+	  pArgs[5] = Val_int(src.start_row);
+	  pArgs[6] = Val_int(src.start_col);
+	  pArgs[7] = Val_int(src.end_row);
+	  pArgs[8] = Val_int(src.end_col);
+
+	caml_callbackN(*reason_libvterm_onScreenMoveRect, 9, pArgs);
 
 	CAMLreturn(0);
 }
@@ -106,7 +176,23 @@ int reason_libvterm_onScreenMoveRectF(VTermRect dest, VTermRect src, void *user)
 int reason_libvterm_onScreenMoveCursorF(VTermPos pos, VTermPos oldPos, int visible, void *user) {
 	CAMLparam0();
 
-	printf("!!!!\n MOVECURSOR\n !!!!\n");
+	static value *reason_libvterm_onScreenMoveCursor = NULL;
+
+	if (reason_libvterm_onScreenMoveCursor == NULL) {
+		reason_libvterm_onScreenMoveCursor = (value *)caml_named_value("reason_libvterm_onScreenMoveCursor");
+	}
+
+	  value *pArgs = (value *)malloc(sizeof(value) * 6);
+	  pArgs[0] = Val_int(user);
+	  pArgs[1] = Val_int(pos.row);
+	  pArgs[2] = Val_int(pos.col);
+	  pArgs[3] = Val_int(oldPos.row);
+	  pArgs[4] = Val_int(oldPos.col);
+	  pArgs[5] = Val_bool(visible);
+
+	caml_callbackN(*reason_libvterm_onScreenMoveCursor, 6, pArgs);
+	free(pArgs);
+
 
 	CAMLreturn(0);
 }
@@ -176,6 +262,18 @@ int VTermMod_val(value vMod) {
 	}
 }
 
+CAMLprim value reason_libvterm_vterm_screen_enable_altscreen(value vTerm, value vAlt) {
+	CAMLparam2(vTerm, vAlt);
+
+	VTerm *pTerm = (VTerm*)vTerm;
+	int altScreenEnabled = Int_val(vAlt);
+	VTermScreen* pScreen = vterm_obtain_screen(pTerm);
+
+	vterm_screen_enable_altscreen(pScreen, altScreenEnabled);
+
+	CAMLreturn(Val_unit);
+}
+
 CAMLprim value reason_libvterm_vterm_screen_get_cell(value vTerm, value vRow, value vCol) {
 	CAMLparam3(vTerm, vRow, vCol);
 	CAMLlocal1(ret);
@@ -215,6 +313,7 @@ static VTermScreenCallbacks reason_libvterm_screen_callbacks = {
 	.damage = &reason_libvterm_onScreenDamageF,
 	.moverect = &reason_libvterm_onScreenMoveRectF,
 	.movecursor = &reason_libvterm_onScreenMoveCursorF,
+	.settermprop = &reason_libvterm_onScreenSetTermPropF,
 	.sb_pushline = &reason_libvterm_onScreenSbPushLineF,
 	.sb_popline = &reason_libvterm_onScreenSbPopLineF,
 };

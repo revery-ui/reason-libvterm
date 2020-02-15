@@ -21,6 +21,15 @@ module Rect = {
     startCol: int,
     endCol: int,
   };
+
+  let toString = ({startRow, endRow, startCol, endCol}) =>
+    Printf.sprintf(
+      "startRow: %d startCol: %d endRow: %d endCol: %d",
+      startRow,
+      startCol,
+      endRow,
+      endCol,
+    );
 };
 
 module Pos = {
@@ -28,24 +37,39 @@ module Pos = {
     row: int,
     col: int,
   };
-};
 
+  let toString = ({row, col}) =>
+    Printf.sprintf("row: %d col: %d", row, col);
+};
 
 module TermProp = {
   module CursorShape = {
     type t =
-    | Block
-    | Underline
-    | BarLeft;
-  }
+      | Block
+      | Underline
+      | BarLeft;
+
+    let toString =
+      fun
+      | Block => "Block"
+      | Underline => "Underline"
+      | BarLeft => "BarLeft";
+  };
 
   module Mouse = {
     type t =
-    | None
-    | Click
-    | Drag
-    | Move;
-  }
+      | None
+      | Click
+      | Drag
+      | Move;
+
+    let toString =
+      fun
+      | None => "None"
+      | Click => "Click"
+      | Drag => "Drag"
+      | Move => "Move";
+  };
 
   type t =
     | None
@@ -57,6 +81,19 @@ module TermProp = {
     | Reverse(bool)
     | CursorShape(CursorShape.t)
     | Mouse(Mouse.t);
+
+  let toString =
+    fun
+    | None => "None"
+    | CursorVisible(viz) => Printf.sprintf("CursorVisible: %b", viz)
+    | CursorBlink(blink) => Printf.sprintf("CursorBlink: %B", blink)
+    | AltScreen(alt) => Printf.sprintf("AltScreen: %b", alt)
+    | Title(str) => Printf.sprintf("Title: %s", str)
+    | IconName(str) => Printf.sprintf("IconName: %s", str)
+    | Reverse(rev) => Printf.sprintf("Reverse: %b", rev)
+    | CursorShape(cursor) =>
+      Printf.sprintf("CursorShape: %s", CursorShape.toString(cursor))
+    | Mouse(mouse) => Printf.sprintf("Mouse: %s", Mouse.toString(mouse));
 };
 
 module Color = {
@@ -66,11 +103,12 @@ module Color = {
     | Rgb(int, int, int)
     | Index(int);
 
-  let show = fun
-  | DefaultForeground => "DefaultForeground"
-  | DefaultBackground => "DefaultBackground"
-  | Rgb(r, g, b) => Printf.sprintf("rgb(%d, %d, %d)", r, g, b)
-  | Index(idx) => Printf.sprintf("index(%d)", idx);
+  let show =
+    fun
+    | DefaultForeground => "DefaultForeground"
+    | DefaultBackground => "DefaultBackground"
+    | Rgb(r, g, b) => Printf.sprintf("rgb(%d, %d, %d)", r, g, b)
+    | Index(idx) => Printf.sprintf("index(%d)", idx);
 };
 
 module ScreenCell = {
@@ -105,7 +143,7 @@ module ScreenCell = {
     reverse: 0,
     conceal: 0,
     strike: 0,
-  }
+  };
 };
 
 type callbacks = {
@@ -113,7 +151,7 @@ type callbacks = {
   onScreenDamage: ref(Rect.t => unit),
   onScreenMoveRect: ref((Rect.t, Rect.t) => unit),
   onScreenMoveCursor: ref((Pos.t, Pos.t, bool) => unit),
-  onScreenSetTermProp: ref((TermProp.t) => unit),
+  onScreenSetTermProp: ref(TermProp.t => unit),
   onScreenBell: ref(unit => unit),
   onScreenResize: ref((int, int) => unit),
   onScreenScrollbackPushLine: ref(array(ScreenCell.t) => unit),
@@ -145,7 +183,11 @@ module Internal = {
   external keyboard_unichar: (terminal, Int32.t, modifier) => unit =
     "reason_libvterm_vterm_keyboard_unichar";
 
-  external screen_get_cell: (terminal, int, int) => ScreenCell.t = "reason_libvterm_vterm_screen_get_cell";
+  external screen_get_cell: (terminal, int, int) => ScreenCell.t =
+    "reason_libvterm_vterm_screen_get_cell";
+
+  external screen_enable_altscreen: (terminal, int) => unit =
+    "reason_libvterm_vterm_screen_enable_altscreen";
 
   let onOutput = (id: int, output: string) => {
     switch (Hashtbl.find_opt(idToOutputCallback, id)) {
@@ -175,10 +217,68 @@ module Internal = {
     };
   };
 
+  let onScreenMoveCursor = (id: int, newRow, newCol, oldRow, oldCol, visible) => {
+    switch (Hashtbl.find_opt(idToOutputCallback, id)) {
+    | Some({onScreenMoveCursor, _}) =>
+      onScreenMoveCursor^(
+        Pos.{row: newRow, col: newCol},
+        Pos.{row: oldRow, col: oldCol},
+        visible,
+      )
+    | None => ()
+    };
+  };
+
+  let onScreenMoveRect =
+      (
+        id: int,
+        id: int,
+        destStartRow: int,
+        destStartCol: int,
+        destEndRow: int,
+        destEndCol: int,
+        srcStartRow: int,
+        srcStartCol: int,
+        srcEndRow: int,
+        srcEndCol: int,
+      ) => {
+    switch (Hashtbl.find_opt(idToOutputCallback, id)) {
+    | Some({onScreenMoveRect, _}) =>
+      onScreenMoveRect^(
+        Rect.{
+          startRow: destStartRow,
+          startCol: destStartCol,
+          endRow: destEndRow,
+          endCol: destEndCol,
+        },
+        Rect.{
+          startRow: srcStartRow,
+          startCol: srcStartCol,
+          endRow: srcEndRow,
+          endCol: srcEndCol,
+        },
+      )
+    | None => ()
+    };
+  };
+
+  let onScreenSetTermProp = (id: int, termProp: TermProp.t) => {
+    switch (Hashtbl.find_opt(idToOutputCallback, id)) {
+    | Some({onScreenSetTermProp, _}) => onScreenSetTermProp^(termProp)
+    | None => ()
+    };
+  };
+
   Callback.register("reason_libvterm_onOutput", onOutput);
   Callback.register("reason_libvterm_onScreenBell", onScreenBell);
   Callback.register("reason_libvterm_onScreenResize", onScreenResize);
   Callback.register("reason_libvterm_onScreenDamage", onScreenDamage);
+  Callback.register("reason_libvterm_onScreenMoveCursor", onScreenMoveCursor);
+  Callback.register("reason_libvterm_onScreenMoveRect", onScreenMoveRect);
+  Callback.register(
+    "reason_libvterm_onScreenSetTermProp",
+    onScreenSetTermProp,
+  );
 };
 
 module Screen = {
@@ -194,8 +294,24 @@ module Screen = {
     terminal.callbacks.onScreenDamage := onDamage;
   };
 
-  let getCell = (~row, ~col, {terminal, _}) =>  {
-    Internal.screen_get_cell(terminal, row, col); 
+  let setMoveCursorCallback = (~onMoveCursor, terminal) => {
+    terminal.callbacks.onScreenMoveCursor := onMoveCursor;
+  };
+
+  let setMoveRectCallback = (~onMoveRect, terminal) => {
+    terminal.callbacks.onScreenMoveRect := onMoveRect;
+  };
+
+  let getCell = (~row, ~col, {terminal, _}) => {
+    Internal.screen_get_cell(terminal, row, col);
+  };
+
+  let setAltScreen = (~enabled, {terminal, _}) => {
+    Internal.screen_enable_altscreen(terminal, enabled ? 1 : 0);
+  };
+
+  let setTermPropCallback = (~onSetTermProp, terminal) => {
+    terminal.callbacks.onScreenSetTermProp := onSetTermProp;
   };
 };
 
@@ -215,7 +331,7 @@ let make = (~rows, ~cols) => {
   let onScreenMoveCursor = ref((_, _, _) => ());
   let onScreenBell = ref(() => ());
   let onScreenResize = ref((_, _) => ());
-  let onScreenSetTermProp = ref((_) => ());
+  let onScreenSetTermProp = ref(_ => ());
   let onScreenScrollbackPushLine = ref(_ => ());
   let onScreenScrollbackPopLine = ref(_ => ());
   let callbacks = {

@@ -42,7 +42,43 @@ describe("VTerm", ({describe, test}) => {
       expect.equal(cell.chars.[0], 'a');
     });
   });
-  describe("input", ({test, _}) => {
+  describe("input", ({test, describe}) => {
+    describe("TermProps", ({test, _}) => {
+      test("title term prop is set", ({expect}) => {
+        let vterm = make(~rows=20, ~cols=30);
+
+        let title = ref("");
+        Screen.setTermPropCallback(
+          ~onSetTermProp=
+            fun
+            | TermProp.Title(t) => title := t
+            | _ => (),
+          vterm,
+        );
+
+        let str = "\027]2;abc";
+        let _: int = write(~input=str, vterm);
+
+        expect.equal(title^, "abc");
+      });
+      test("icon term prop is set", ({expect}) => {
+        let vterm = make(~rows=20, ~cols=30);
+
+        let icon = ref("");
+        Screen.setTermPropCallback(
+          ~onSetTermProp=
+            fun
+            | TermProp.IconName(t) => icon := t
+            | _ => (),
+          vterm,
+        );
+
+        let str = "\027]1;icon";
+        let _: int = write(~input=str, vterm);
+
+        expect.equal(icon^, "icon");
+      });
+    });
     test("returns value", ({expect}) => {
       let vterm = make(~rows=20, ~cols=30);
 
