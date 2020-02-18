@@ -10,7 +10,7 @@ describe("VTerm", ({describe, test}) => {
     Gc.full_major();
 
     expect.equal(isFinalized^, true);
-  })
+  });
   test("utf8", ({expect}) => {
     let vterm = make(~rows=20, ~cols=20);
     setUtf8(~utf8=true, vterm);
@@ -24,18 +24,116 @@ describe("VTerm", ({describe, test}) => {
     expect.equal(rows, 20);
     expect.equal(cols, 30);
 
-    setSize(~size={rows:10, cols: 15}, vterm);
+    setSize(~size={rows: 10, cols: 15}, vterm);
     let {rows, cols} = getSize(vterm);
     expect.equal(rows, 10);
     expect.equal(cols, 15);
   });
-  describe("input", ({test, _}) => {
+  describe("screen", ({test, _}) => {
+    test("gets empty cell", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+      let cell = Screen.getCell(~row=0, ~col=0, vterm);
+      expect.equal(cell.chars.[0], Char.chr(0));
+    });
+    test("gets non-empty cell", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+      let _: int = write(~input=String.make(1, 'a'), vterm);
+      let cell = Screen.getCell(~row=0, ~col=0, vterm);
+      expect.equal(cell.chars.[0], 'a');
+    });
+  });
+  describe("input", ({test, describe}) => {
+    describe("TermProps", ({test, _}) => {
+      test("title term prop is set", ({expect}) => {
+        let vterm = make(~rows=20, ~cols=30);
+
+        let title = ref("");
+        Screen.setTermPropCallback(
+          ~onSetTermProp=
+            fun
+            | TermProp.Title(t) => title := t
+            | _ => (),
+          vterm,
+        );
+
+        let str = "\027]2;abc";
+        let _: int = write(~input=str, vterm);
+
+        expect.equal(title^, "abc");
+      });
+      test("icon term prop is set", ({expect}) => {
+        let vterm = make(~rows=20, ~cols=30);
+
+        let icon = ref("");
+        Screen.setTermPropCallback(
+          ~onSetTermProp=
+            fun
+            | TermProp.IconName(t) => icon := t
+            | _ => (),
+          vterm,
+        );
+
+        let str = "\027]1;icon";
+        let _: int = write(~input=str, vterm);
+
+        expect.equal(icon^, "icon");
+      });
+    });
     test("returns value", ({expect}) => {
       let vterm = make(~rows=20, ~cols=30);
 
       let res = write(~input="abc", vterm);
       expect.equal(res, 3);
     });
-  
+
+    test("beeps", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let gotBell = ref(false);
+      Screen.setBellCallback(~onBell=_ => gotBell := true, vterm);
+      let _: int = write(~input=String.make(1, Char.chr(7)), vterm);
+      expect.equal(true, gotBell^);
+    });
+    test("resize", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let getRows = ref(0);
+      let getCols = ref(0);
+      Screen.setResizeCallback(
+        ~onResize=
+          ({rows, cols}) => {
+            getRows := rows;
+            getCols := cols;
+          },
+        vterm,
+      );
+      setSize(~size={rows: 5, cols: 6}, vterm);
+      expect.equal(getRows^, 5);
+      expect.equal(getCols^, 6);
+    });
+
+    test("damage", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let damageCount = ref(0);
+      Screen.setDamageCallback(~onDamage=_ => incr(damageCount), vterm);
+
+      let _: int = write(~input="a", vterm);
+      expect.equal(damageCount^, 1);
+
+      Gc.full_major();
+      let _: int = write(~input="b", vterm);
+      expect.equal(damageCount^, 2);
+    });
+  });
+  describe("output", ({test, _}) => {
+    test("keyboard_unichar_test", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let gotOutput = ref(false);
+      setOutputCallback(~onOutput=_ => gotOutput := true, vterm);
+      let () = Keyboard.unichar(vterm, Int32.of_int(65), None);
+      expect.equal(true, gotOutput^);
+    })
   });
 });

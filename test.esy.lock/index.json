@@ -1,5 +1,5 @@
 {
-  "checksum": "e6cc844cc8df704b30c2e6973374146b",
+  "checksum": "1e2b122f67f08ff930e3fa66324725ba",
   "root": "reason-libvterm@link-dev:./package.json",
   "node": {
     "texinfo@github:esy-packages/esy-texinfo#4a05feafbbcc4c57d5d25899fbdab98961b9a69c@d41d8cd9": {
@@ -49,8 +49,7 @@
       },
       "overrides": [ "test.json" ],
       "dependencies": [
-        "refmterr@3.3.0@d41d8cd9",
-        "esy-libvterm@github:revery-ui/esy-libvterm#5bac869@d41d8cd9",
+        "refmterr@3.3.0@d41d8cd9", "esy-libvterm@1.0.0@d41d8cd9",
         "@reason-native/rely@2.2.0@d41d8cd9",
         "@opam/dune-configurator@opam:2.2.0@95249fb0",
         "@opam/dune@opam:2.2.0@9f6b1c70", "@esy-ocaml/reason@3.5.2@d41d8cd9"
@@ -71,13 +70,15 @@
       "dependencies": [],
       "devDependencies": []
     },
-    "esy-libvterm@github:revery-ui/esy-libvterm#5bac869@d41d8cd9": {
-      "id": "esy-libvterm@github:revery-ui/esy-libvterm#5bac869@d41d8cd9",
+    "esy-libvterm@1.0.0@d41d8cd9": {
+      "id": "esy-libvterm@1.0.0@d41d8cd9",
       "name": "esy-libvterm",
-      "version": "github:revery-ui/esy-libvterm#5bac869",
+      "version": "1.0.0",
       "source": {
         "type": "install",
-        "source": [ "github:revery-ui/esy-libvterm#5bac869" ]
+        "source": [
+          "archive:https://registry.npmjs.org/esy-libvterm/-/esy-libvterm-1.0.0.tgz#sha1:7555a7e3192042cc327ada34340ba55d042064cd"
+        ]
       },
       "overrides": [],
       "dependencies": [
@@ -168,7 +169,7 @@
         "refmterr@3.3.0@d41d8cd9", "ocaml@4.9.0@d41d8cd9",
         "@reason-native/pastel@0.3.0@d41d8cd9",
         "@reason-native/file-context-printer@0.0.3@d41d8cd9",
-        "@opam/re@opam:1.9.0@d4d5e13d", "@opam/junit@opam:2.0.1@1b4d302c",
+        "@opam/re@opam:1.9.0@d4d5e13d", "@opam/junit@opam:2.0.2@0b7bd730",
         "@opam/dune@opam:2.2.0@9f6b1c70", "@esy-ocaml/reason@3.5.2@d41d8cd9"
       ],
       "devDependencies": []
@@ -537,20 +538,20 @@
       ],
       "devDependencies": [ "ocaml@4.9.0@d41d8cd9" ]
     },
-    "@opam/ocaml-migrate-parsetree@opam:1.5.0@3e319dbc": {
-      "id": "@opam/ocaml-migrate-parsetree@opam:1.5.0@3e319dbc",
+    "@opam/ocaml-migrate-parsetree@opam:1.6.0@da2643e7": {
+      "id": "@opam/ocaml-migrate-parsetree@opam:1.6.0@da2643e7",
       "name": "@opam/ocaml-migrate-parsetree",
-      "version": "opam:1.5.0",
+      "version": "opam:1.6.0",
       "source": {
         "type": "install",
         "source": [
-          "archive:https://opam.ocaml.org/cache/sha256/7f/7f56679c9561552762666de5b6b81c8e4cc2e9fd92272e2269878a2eb534e3c0#sha256:7f56679c9561552762666de5b6b81c8e4cc2e9fd92272e2269878a2eb534e3c0",
-          "archive:https://github.com/ocaml-ppx/ocaml-migrate-parsetree/releases/download/v1.5.0/ocaml-migrate-parsetree-v1.5.0.tbz#sha256:7f56679c9561552762666de5b6b81c8e4cc2e9fd92272e2269878a2eb534e3c0"
+          "archive:https://opam.ocaml.org/cache/sha256/9b/9b018e7d25114ce17fc0b82b7cd7c927b84ebb6b043aa987fa7731c2484de33f#sha256:9b018e7d25114ce17fc0b82b7cd7c927b84ebb6b043aa987fa7731c2484de33f",
+          "archive:https://github.com/ocaml-ppx/ocaml-migrate-parsetree/releases/download/v1.6.0/ocaml-migrate-parsetree-v1.6.0.tbz#sha256:9b018e7d25114ce17fc0b82b7cd7c927b84ebb6b043aa987fa7731c2484de33f"
         ],
         "opam": {
           "name": "ocaml-migrate-parsetree",
-          "version": "1.5.0",
-          "path": "test.esy.lock/opam/ocaml-migrate-parsetree.1.5.0"
+          "version": "1.6.0",
+          "path": "test.esy.lock/opam/ocaml-migrate-parsetree.1.6.0"
         }
       },
       "overrides": [],
@@ -668,20 +669,20 @@
         "@opam/dune@opam:2.2.0@9f6b1c70"
       ]
     },
-    "@opam/junit@opam:2.0.1@1b4d302c": {
-      "id": "@opam/junit@opam:2.0.1@1b4d302c",
+    "@opam/junit@opam:2.0.2@0b7bd730": {
+      "id": "@opam/junit@opam:2.0.2@0b7bd730",
       "name": "@opam/junit",
-      "version": "opam:2.0.1",
+      "version": "opam:2.0.2",
       "source": {
         "type": "install",
         "source": [
-          "archive:https://opam.ocaml.org/cache/md5/40/40224fb3d4f5e47dc5ff4605587d383b#md5:40224fb3d4f5e47dc5ff4605587d383b",
-          "archive:https://github.com/Khady/ocaml-junit/releases/download/2.0.1/junit-2.0.1.tbz#md5:40224fb3d4f5e47dc5ff4605587d383b"
+          "archive:https://opam.ocaml.org/cache/sha256/fd/fda941b653613a4a5731f9b3557364b12baa341daa13c01676c9eb8d64e96b01#sha256:fda941b653613a4a5731f9b3557364b12baa341daa13c01676c9eb8d64e96b01",
+          "archive:https://github.com/Khady/ocaml-junit/releases/download/2.0.2/junit-2.0.2.tbz#sha256:fda941b653613a4a5731f9b3557364b12baa341daa13c01676c9eb8d64e96b01"
         ],
         "opam": {
           "name": "junit",
-          "version": "2.0.1",
-          "path": "test.esy.lock/opam/junit.2.0.1"
+          "version": "2.0.2",
+          "path": "test.esy.lock/opam/junit.2.0.2"
         }
       },
       "overrides": [],
@@ -1040,7 +1041,7 @@
       "dependencies": [
         "ocaml@4.9.0@d41d8cd9", "@opam/result@opam:1.4@dc720aef",
         "@opam/ocamlfind@opam:1.8.1@ff07b0f9",
-        "@opam/ocaml-migrate-parsetree@opam:1.5.0@3e319dbc",
+        "@opam/ocaml-migrate-parsetree@opam:1.6.0@da2643e7",
         "@opam/merlin-extend@opam:0.5@a5dd7d4b",
         "@opam/menhir@opam:20200211@90483d81",
         "@opam/dune@opam:2.2.0@9f6b1c70"
