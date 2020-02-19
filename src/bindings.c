@@ -176,6 +176,7 @@ int reason_libvterm_onScreenMoveRectF(VTermRect dest, VTermRect src,
   pArgs[8] = Val_int(src.end_col);
 
   caml_callbackN(*reason_libvterm_onScreenMoveRect, 9, pArgs);
+  free(pArgs);
 
   CAMLreturn(0);
 }

@@ -41,7 +41,14 @@ let () = {
     | _ => [Sys.getenv("LIBVTERM_LIB_PATH") ++ "/libvterm.a"]
     };
 
+  let flags_with_sanitize =
+    switch (get_os) {
+    | Linux => flags @ ccopt("-fsanitize=address")
+    | _ => flags
+    };
+
   write_sexp("flags.sexp", flags);
+  write_sexp("flags_with_sanitize.sexp", flags_with_sanitize);
   write_lines("c_flags.txt", cflags);
   write_sexp("c_flags.sexp", cflags);
   write_sexp("c_library_flags.sexp", libs);

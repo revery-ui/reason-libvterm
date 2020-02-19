@@ -14,3 +14,5 @@ steps:
     displayName: 'esy @test install'
   - script: esy @test build
     displayName: 'esy @test build'
+  - script: esy @test run
+    displayName: 'esy @test run'

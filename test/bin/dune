@@ -1,7 +1,13 @@
 (executable
     (name VTermUnitTestRunner)
     (public_name VTermUnitTestRunner)
+    (flags (:include flags_with_sanitize.sexp))
     (package vterm-test)
     (libraries
         vterm-test.lib
             ))
+
+(rule
+    (targets flags_with_sanitize.sexp)
+    (deps (:discover ../../src/config/discover.exe))
+    (action (run %{discover})))
