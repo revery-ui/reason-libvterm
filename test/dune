@@ -5,5 +5,5 @@
     (public_name vterm-test.lib)
     (flags (:standard (-w -39)))
     (ocamlopt_flags -linkall -g)
-    (libraries rely.lib vterm)
+    (libraries rely.lib vterm reason-native-crash-utils.asan)
 )

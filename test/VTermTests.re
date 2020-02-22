@@ -125,6 +125,27 @@ describe("VTerm", ({describe, test}) => {
       let _: int = write(~input="b", vterm);
       expect.equal(damageCount^, 2);
     });
+    test("regression test: corruption with GC", ({expect}) => {
+      // This reproduces an issue where we had grabbed a char* pointer
+      // in the C binding, but during the course of operation, when the GC
+      // kicked in - that pointer would no longer be valid, and we'd end up
+      // with corrupted output.
+      let vterm = make(~rows=100, ~cols=100);
+
+      // We can reproduce this by writing a long string, and forcing a GC.
+      Screen.setDamageCallback(~onDamage=_ => Gc.full_major(), vterm);
+
+      let longString = String.make(100 * 100 * 2, 'a');
+      let _: int = write(~input=longString, vterm);
+
+      // Validate all cells show 'a'
+      for (row in 0 to 99) {
+        for (col in 0 to 99) {
+          let cell = Screen.getCell(~row, ~col, vterm)
+          expect.equal(cell.chars.[0], 'a');
+        }
+      }
+    });
   });
   describe("output", ({test, _}) => {
     test("keyboard_unichar_test", ({expect}) => {

@@ -367,7 +367,7 @@ CAMLprim value reason_libvterm_vterm_new(value vId, value vRows, value vCol) {
   int rows = Int_val(vRows);
   int cols = Int_val(vCol);
   VTerm *pTerm = vterm_new(rows, cols);
-  vterm_set_utf8(pTerm, true);
+  //vterm_set_utf8(pTerm, true);
   vterm_output_set_callback(pTerm, &reason_libvterm_onOutputF, id);
   VTermScreen *pScreen = vterm_obtain_screen(pTerm);
   vterm_screen_set_callbacks(pScreen, &reason_libvterm_screen_callbacks, id);
@@ -424,7 +424,8 @@ CAMLprim value reason_libvterm_vterm_input_write(value vTerm, value vStr) {
   CAMLparam2(vTerm, vStr);
   VTerm *pTerm = (VTerm *)vTerm;
   int len = caml_string_length(vStr);
-  char *bytes = String_val(vStr);
+  char *bytes = strdup(String_val(vStr));
   int ret = vterm_input_write(pTerm, bytes, len);
+  free(bytes);
   CAMLreturn(Val_int(ret));
 }

@@ -24,9 +24,10 @@
     "@opam/dune-configurator": "*",
     "@esy-ocaml/reason": "^3.3.7",
     "refmterr": "^3.1.0",
-    "esy-libvterm": "^1.0.0"
+    "esy-libvterm": "^1.0.0",
+    "reason-native-crash-utils": "github:onivim/reason-native-crash-utils#ae1fd34"
   },
   "devDependencies": {
-    "ocaml": ">=4.6.0 <=4.9.0"
+    "ocaml": "~4.8.0"
   }
 }
