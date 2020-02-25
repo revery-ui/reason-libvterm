@@ -11,16 +11,11 @@
 
 #include <vterm.h>
 
-static value reason_libvterm_Val_color(VTermScreen *pScreen,
-                                       VTermColor *pColor) {
+static value reason_libvterm_Val_color(VTermColor *pColor) {
   CAMLparam0();
   CAMLlocal1(ret);
 
   int tag;
-
-  if (pScreen) {
-    vterm_screen_convert_color_to_rgb(pScreen, pColor);
-  }
 
   if (VTERM_COLOR_IS_DEFAULT_FG(pColor)) {
     ret = Int_val(0);
@@ -40,7 +35,7 @@ static value reason_libvterm_Val_color(VTermScreen *pScreen,
   CAMLreturn(ret);
 }
 
-static value reason_libvterm_Val_screencell(VTermScreen *pScreen,
+static value reason_libvterm_Val_screencell(
                                             VTermScreenCell *pScreenCell) {
   CAMLparam0();
   CAMLlocal2(ret, str);
@@ -50,8 +45,8 @@ static value reason_libvterm_Val_screencell(VTermScreen *pScreen,
   ret = caml_alloc(11, 0);
   Store_field(ret, 0, str);
   Store_field(ret, 1, Val_int(pScreenCell->width));
-  Store_field(ret, 2, reason_libvterm_Val_color(pScreen, &pScreenCell->fg));
-  Store_field(ret, 3, reason_libvterm_Val_color(pScreen, &pScreenCell->bg));
+  Store_field(ret, 2, reason_libvterm_Val_color(&pScreenCell->fg));
+  Store_field(ret, 3, reason_libvterm_Val_color(&pScreenCell->bg));
   Store_field(ret, 4, Val_int(pScreenCell->attrs.bold));
   Store_field(ret, 5, Val_int(pScreenCell->attrs.underline));
   Store_field(ret, 6, Val_int(pScreenCell->attrs.italic));
@@ -214,7 +209,7 @@ int reason_libvterm_onScreenSbPushLineF(int cols, const VTermScreenCell *cells,
   ret = caml_alloc(cols, 0);
 
   for (int i = 0; i < cols; i++) {
-    Store_field(ret, i, reason_libvterm_Val_screencell(NULL, &cells[i]));
+    Store_field(ret, i, reason_libvterm_Val_screencell(&cells[i]));
   }
 
   static value *reason_libvterm_onScreenSbPushLine = NULL;
@@ -237,7 +232,7 @@ int reason_libvterm_onScreenSbPopLineF(int cols, VTermScreenCell *cells,
   ret = caml_alloc(cols, 0);
 
   for (int i = 0; i < cols; i++) {
-    Store_field(ret, i, reason_libvterm_Val_screencell(NULL, &cells[i]));
+    Store_field(ret, i, reason_libvterm_Val_screencell(&cells[i]));
   }
 
   static value *reason_libvterm_onScreenSbPopLine = NULL;
@@ -374,7 +369,7 @@ CAMLprim value reason_libvterm_vterm_screen_get_cell(value vTerm, value vRow,
   VTermScreenCell cell;
   vterm_screen_get_cell(pScreen, pos, &cell);
 
-  ret = reason_libvterm_Val_screencell(pScreen, &cell);
+  ret = reason_libvterm_Val_screencell(&cell);
 
   CAMLreturn(ret);
 }
