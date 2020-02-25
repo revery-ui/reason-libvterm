@@ -9,6 +9,23 @@ type modifier =
   | Control
   | All;
 
+type key =
+  | Unicode(Uchar.t)
+  | Enter
+  | Tab
+  | Backspace
+  | Escape
+  | Up
+  | Down
+  | Left
+  | Right
+  | Insert
+  | Delete
+  | Home
+  | End
+  | PageUp
+  | PageDown;
+
 type size = {
   rows: int,
   cols: int,
@@ -183,6 +200,9 @@ module Internal = {
   external keyboard_unichar: (terminal, Int32.t, modifier) => unit =
     "reason_libvterm_vterm_keyboard_unichar";
 
+  external keyboard_key: (terminal, key, modifier) => unit =
+    "reason_libvterm_vterm_keyboard_key";
+
   external screen_get_cell: (terminal, int, int) => ScreenCell.t =
     "reason_libvterm_vterm_screen_get_cell";
 
@@ -342,8 +362,13 @@ module Screen = {
 };
 
 module Keyboard = {
-  let unichar = ({terminal, _}, key: Int32.t, mods: modifier) => {
-    Internal.keyboard_unichar(terminal, key, mods);
+  let input = ({terminal, _}, key, mods: modifier) => {
+    switch (key) {
+    | Unicode(uchar) =>
+      let key = uchar |> Uchar.to_int |> Int32.of_int;
+      Internal.keyboard_unichar(terminal, key, mods);
+    | key => Internal.keyboard_key(terminal, key, mods)
+    };
   };
 };
 

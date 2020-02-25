@@ -7,6 +7,23 @@ type modifier =
   | Control
   | All;
 
+type key =
+  | Unicode(Uchar.t)
+  | Enter
+  | Tab
+  | Backspace
+  | Escape
+  | Up
+  | Down
+  | Left
+  | Right
+  | Insert
+  | Delete
+  | Home
+  | End
+  | PageUp
+  | PageDown;
+
 type size = {
   rows: int,
   cols: int,
@@ -129,4 +146,4 @@ module Screen: {
   let setAltScreen: (~enabled: bool, t) => unit;
 };
 
-module Keyboard: {let unichar: (t, Int32.t, modifier) => unit;};
+module Keyboard: {let input: (t, key, modifier) => unit;};

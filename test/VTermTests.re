@@ -126,35 +126,45 @@ describe("VTerm", ({describe, test}) => {
       expect.equal(damageCount^, 2);
     });
     test("regression test: corruption with GC", ({expect}) => {
+      let size = 25;
       // This reproduces an issue where we had grabbed a char* pointer
       // in the C binding, but during the course of operation, when the GC
       // kicked in - that pointer would no longer be valid, and we'd end up
       // with corrupted output.
-      let vterm = make(~rows=100, ~cols=100);
+      let vterm = make(~rows=size, ~cols=size);
 
       // We can reproduce this by writing a long string, and forcing a GC.
       Screen.setDamageCallback(~onDamage=_ => Gc.full_major(), vterm);
 
-      let longString = String.make(100 * 100 * 2, 'a');
+      let longString = String.make(size * size * 2, 'a');
       let _: int = write(~input=longString, vterm);
 
       // Validate all cells show 'a'
-      for (row in 0 to 99) {
-        for (col in 0 to 99) {
-          let cell = Screen.getCell(~row, ~col, vterm)
+      for (row in 0 to size - 1) {
+        for (col in 0 to size - 1) {
+          let cell = Screen.getCell(~row, ~col, vterm);
           expect.equal(cell.chars.[0], 'a');
-        }
-      }
+        };
+      };
     });
   });
   describe("output", ({test, _}) => {
-    test("keyboard_unichar_test", ({expect}) => {
+    let str = i => i |> Char.chr |> String.make(1);
+    test("Unicode character", ({expect}) => {
       let vterm = make(~rows=20, ~cols=30);
 
-      let gotOutput = ref(false);
-      setOutputCallback(~onOutput=_ => gotOutput := true, vterm);
-      let () = Keyboard.unichar(vterm, Int32.of_int(65), None);
-      expect.equal(true, gotOutput^);
-    })
+      let output = ref([]);
+      setOutputCallback(~onOutput=s => output := [s], vterm);
+      let () = Keyboard.input(vterm, Unicode(Uchar.of_int(65)), None);
+      expect.equal(["A"], output^);
+    });
+    test("Enter character", ({expect}) => {
+      let vterm = make(~rows=20, ~cols=30);
+
+      let output = ref([]);
+      setOutputCallback(~onOutput=s => output := [s], vterm);
+      let () = Keyboard.input(vterm, Enter, None);
+      expect.equal([str(13)], output^);
+    });
   });
 });

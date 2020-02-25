@@ -304,6 +304,46 @@ int VTermMod_val(value vMod) {
   }
 }
 
+VTermKey VTermKey_val(value vKey) {
+
+  if (Is_block(vKey)) {
+    return VTERM_KEY_NONE;
+  }
+
+  switch (Int_val(vKey)) {
+  case 0:
+    return VTERM_KEY_ENTER;
+  case 1:
+    return VTERM_KEY_TAB;
+  case 2:
+    return VTERM_KEY_BACKSPACE;
+  case 3:
+    return VTERM_KEY_ESCAPE;
+  case 4:
+    return VTERM_KEY_UP;
+  case 5:
+    return VTERM_KEY_DOWN;
+  case 6:
+    return VTERM_KEY_LEFT;
+  case 7:
+    return VTERM_KEY_RIGHT;
+  case 8:
+    return VTERM_KEY_INS;
+  case 9:
+    return VTERM_KEY_DEL;
+  case 10:
+    return VTERM_KEY_HOME;
+  case 11:
+    return VTERM_KEY_END;
+  case 12:
+    return VTERM_KEY_PAGEUP;
+  case 13:
+    return VTERM_KEY_PAGEDOWN;
+  default:
+    return VTERM_KEY_NONE;
+  }
+}
+
 CAMLprim value reason_libvterm_vterm_screen_enable_altscreen(value vTerm,
                                                              value vAlt) {
   CAMLparam2(vTerm, vAlt);
@@ -350,6 +390,19 @@ CAMLprim value reason_libvterm_vterm_keyboard_unichar(value vTerm, value vChar,
 
   CAMLreturn(Val_unit);
 }
+
+CAMLprim value reason_libvterm_vterm_keyboard_key(value vTerm, value vKey,
+                                                      value vMod) {
+  CAMLparam3(vTerm, vKey, vMod);
+
+  VTerm *pTerm = (VTerm *)vTerm;
+  VTermKey key = VTermKey_val(vKey);
+  VTermModifier mod = VTermMod_val(vMod);
+  vterm_keyboard_key(pTerm, key, mod);
+
+  CAMLreturn(Val_unit);
+}
+
 static VTermScreenCallbacks reason_libvterm_screen_callbacks = {
     .bell = &reason_libvterm_onScreenBellF,
     .resize = &reason_libvterm_onScreenResizeF,
