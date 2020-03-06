@@ -130,7 +130,7 @@ module Color = {
 
 module ScreenCell = {
   type t = {
-    chars: string,
+    char: Uchar.t,
     width: int,
     fg: Color.t,
     bg: Color.t,
@@ -149,7 +149,7 @@ module ScreenCell = {
   };
 
   let empty: t = {
-    chars: "",
+    char: Uchar.of_int(0),
     width: 0,
     fg: Color.DefaultForeground,
     bg: Color.DefaultBackground,

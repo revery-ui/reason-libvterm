@@ -38,12 +38,12 @@ static value reason_libvterm_Val_color(VTermColor *pColor) {
 static value reason_libvterm_Val_screencell(
                                             VTermScreenCell *pScreenCell) {
   CAMLparam0();
-  CAMLlocal2(ret, str);
+  CAMLlocal1(ret);
 
-  str = caml_alloc_string(VTERM_MAX_CHARS_PER_CELL);
-  memcpy(String_val(str), pScreenCell->chars, VTERM_MAX_CHARS_PER_CELL);
+  uint32_t c = pScreenCell->chars[0];
+
   ret = caml_alloc(11, 0);
-  Store_field(ret, 0, str);
+  Store_field(ret, 0, Val_int(c));
   Store_field(ret, 1, Val_int(pScreenCell->width));
   Store_field(ret, 2, reason_libvterm_Val_color(&pScreenCell->fg));
   Store_field(ret, 3, reason_libvterm_Val_color(&pScreenCell->bg));

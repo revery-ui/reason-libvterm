@@ -33,16 +33,36 @@ describe("VTerm", ({describe, test}) => {
     test("gets empty cell", ({expect}) => {
       let vterm = make(~rows=20, ~cols=30);
       let cell = Screen.getCell(~row=0, ~col=0, vterm);
-      expect.equal(cell.chars.[0], Char.chr(0));
+      expect.equal(cell.char |> Uchar.to_char, Char.chr(0));
     });
     test("gets non-empty cell", ({expect}) => {
       let vterm = make(~rows=20, ~cols=30);
       let _: int = write(~input=String.make(1, 'a'), vterm);
       let cell = Screen.getCell(~row=0, ~col=0, vterm);
-      expect.equal(cell.chars.[0], 'a');
+      expect.equal(cell.char |> Uchar.to_char, 'a');
     });
   });
   describe("input", ({test, describe}) => {
+    describe("unicode", ({test, _}) => {
+      test("replacement character round-trips", ({expect}) => {
+        let vterm = make(~rows=20, ~cols=30);
+        Vterm.setUtf8(~utf8=true, vterm);
+
+        let damageCount = ref(0);
+        Screen.setDamageCallback(~onDamage=_ => incr(damageCount), vterm);
+
+        let buffer = Buffer.create(5);
+        Buffer.add_utf_8_uchar(buffer, Uchar.rep);
+        let str = Buffer.contents(buffer);
+
+        // Write Unicode replacement character
+        let _: int = write(~input=str, vterm);
+
+        // ...and verify it roundtrips
+        let cell = Screen.getCell(~row=0, ~col=0, vterm);
+        expect.equal(cell.char, Uchar.rep);
+      })
+    });
     describe("TermProps", ({test, _}) => {
       test("title term prop is set", ({expect}) => {
         let vterm = make(~rows=20, ~cols=30);
@@ -143,7 +163,7 @@ describe("VTerm", ({describe, test}) => {
       for (row in 0 to size - 1) {
         for (col in 0 to size - 1) {
           let cell = Screen.getCell(~row, ~col, vterm);
-          expect.equal(cell.chars.[0], 'a');
+          expect.equal(cell.char |> Uchar.to_char, 'a');
         };
       };
     });
