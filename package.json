@@ -25,7 +25,7 @@
     "@esy-ocaml/reason": "^3.3.7",
     "refmterr": "^3.1.0",
     "esy-libvterm": "^1.0.0",
-    "reason-native-crash-utils": "github:onivim/reason-native-crash-utils#ae1fd34"
+    "reason-native-crash-utils": "github:onivim/reason-native-crash-utils#38c8f003"
   },
   "devDependencies": {
     "ocaml": "~4.8.0"
